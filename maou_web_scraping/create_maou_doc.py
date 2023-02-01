@@ -98,13 +98,26 @@ def Scrape_Site(site_url, chapter_heading):
 
             else:
                 # dont print repeated lines
-                if t > 0:
+                """ if t > 0:
                     last_tag_text = finalStory[t-1].get_text(strip=True)
                 current_tag_text = tag.get_text(strip=True)
 
                 if current_tag_text != '' and current_tag_text != last_tag_text:
                     storyPart_text = tag.get_text("\n\n", strip=True)
-                    doc.add_paragraph('\n' + storyPart_text)
+                    doc.add_paragraph('\n' + storyPart_text) """
+                    
+                
+                current_tag_text = tag.get_text(strip=True)
+                storyPart_text = tag.get_text("\n\n", strip=True)
+
+                last_tag_text = ''
+                if current_tag_text != '':
+                    if t > 0:
+                        last_tag_text = finalStory[t-1].get_text(strip=True)
+
+                    # dont print repeated lines
+                    if current_tag_text != last_tag_text:
+                        doc.add_paragraph('\n' + storyPart_text)
 
         doc.add_page_break()
 
