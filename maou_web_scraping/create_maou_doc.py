@@ -54,9 +54,9 @@ def Scrape_Site(site_url, chapter_heading):
         source.raise_for_status()
         soup = BeautifulSoup(source.text, 'html.parser')
 
-        # with open('test_scrape.html', "r", encoding="utf-8") as f:
-        #     contents = f.read()
-        # soup = BeautifulSoup(contents, 'html.parser')
+        """ with open('test.html', "r", encoding="utf-8") as f:
+            contents = f.read()
+        soup = BeautifulSoup(contents, 'html.parser') """
 
         storyPart = soup.select_one(".entry-content")
 
@@ -71,15 +71,14 @@ def Scrape_Site(site_url, chapter_heading):
             header.decompose()
 
         doc.add_heading(chapter_heading, level=1)
-
         finalStory = storyPart.findChildren()
+        skip_tag = None
 
         for t, tag in enumerate(finalStory):
             imgs = tag.findAll("img")
             if imgs != []:
                 for img in imgs:
                     doc.add_page_break()
-
                     img_url = img['src']
                     img_response = requests.get(img_url, stream=True)
                     image = io.BytesIO(img_response.content)
@@ -97,27 +96,17 @@ def Scrape_Site(site_url, chapter_heading):
                     doc.add_page_break()
 
             else:
-                # dont print repeated lines
-                """ if t > 0:
-                    last_tag_text = finalStory[t-1].get_text(strip=True)
-                current_tag_text = tag.get_text(strip=True)
-
-                if current_tag_text != '' and current_tag_text != last_tag_text:
-                    storyPart_text = tag.get_text("\n\n", strip=True)
-                    doc.add_paragraph('\n' + storyPart_text) """
-                    
-                
                 current_tag_text = tag.get_text(strip=True)
                 storyPart_text = tag.get_text("\n\n", strip=True)
 
-                last_tag_text = ''
-                if current_tag_text != '':
-                    if t > 0:
-                        last_tag_text = finalStory[t-1].get_text(strip=True)
-
-                    # dont print repeated lines
-                    if current_tag_text != last_tag_text:
-                        doc.add_paragraph('\n' + storyPart_text)
+                if current_tag_text != '' and skip_tag != tag:
+                    doc.add_paragraph('\n' + storyPart_text)
+                    tagChildren = tag.findChildren()
+                    if tagChildren != []:
+                        first_tagChildren = tagChildren[0]
+                        skip_tag = first_tagChildren
+                    else:
+                        skip_tag = None
 
         doc.add_page_break()
 
@@ -128,12 +117,13 @@ def Scrape_Site(site_url, chapter_heading):
 doc = Document()
 init_document(doc)
 
-# site_url = ''
-# chapter_heading = 'Celebratory: An Alluring Scheme'
-# Scrape_Site(site_url, chapter_heading)
+""" site_url = ''
 
-# fileNameMain = "Maou-no-Hajimekata-{}.docx"
-# doc.save(fileNameMain.format(1))
+chapter_heading = 'An Alluring Scheme'
+Scrape_Site(site_url, chapter_heading)
+
+fileNameMain = "maou-{}.docx"
+doc.save(fileNameMain.format(1)) """
 
 
 excel = openpyxl.load_workbook('Maou no Hajimekata Table of Contents.xlsx')
@@ -194,6 +184,5 @@ for site_url in all_site_url:
         print(count, 'else', chapter_heading)
 
     # testing
-
-    # if count == 4:
+    # if count == 2:
     #     break
